@@ -54,16 +54,12 @@
     if (!key) key = await tryFetch('/carto-key.txt');
     if (key) { cachedKey = key; return key; }
 
-    // If the page is opened directly via file://, fetch is blocked by the browser.
-    // Fall back to the bundled key so the map still works instead of showing a
-    // false "missing" banner.
-    if (location.protocol === 'file:') {
-      cachedKey = FALLBACK_KEY;
-      return cachedKey;
-    }
-
-    showBanner();
-    throw new Error('CARTO key missing: add CARTO_KEY=... to .env and serve the folder over HTTP (python -m http.server).');
+    // Fall back to the bundled key so static hosts (Vercel, etc.) work without
+    // a build step inlining env vars. Client-side map keys are always visible in
+    // tile requests; lock the key to your domain in the CARTO dashboard if you
+    // want to prevent others from using it.
+    cachedKey = FALLBACK_KEY;
+    return cachedKey;
   }
 
   function tileUrl(theme) {
