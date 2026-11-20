@@ -1,0 +1,162 @@
+/* ============================================================
+   NammaBus - pages.css
+   Page-specific styles.
+   ============================================================ */
+
+/* ---- Hero ---- */
+.hero { position: relative; padding: var(--sp-8) 0 var(--sp-6); overflow: hidden; }
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: -20% 10% auto;
+  height: 400px;
+  background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.18), transparent 70%);
+  pointer-events: none;
+}
+.hero__inner { position: relative; }
+.hero__eyebrow {
+  color: var(--express);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.76rem;
+  font-family: var(--font-mono);
+}
+.hero h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.05;
+  margin: var(--sp-2) 0 var(--sp-3);
+  letter-spacing: -0.02em;
+  font-weight: 800;
+}
+.hero h1 span {
+  background: linear-gradient(120deg, var(--express), var(--rajahamsa));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero__lead { color: var(--text-dim); font-size: 1.15rem; max-width: 65ch; margin-bottom: var(--sp-5); line-height: 1.7; }
+
+/* ---- Search card ---- */
+.search-card {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr 1fr auto;
+  gap: var(--sp-2);
+  align-items: end;
+  padding: var(--sp-4);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  
+  -webkit-
+}
+.search-card .btn { align-self: end; height: 48px; }
+.swap-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, border-color 0.15s, transform 0.2s;
+}
+.swap-btn:hover { background: var(--surface-solid); border-color: var(--express); transform: rotate(180deg); }
+
+/* ---- Popular route cards ---- */
+.route-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  color: var(--text);
+  text-decoration: none;
+  height: 100%;
+}
+.route-card:hover { text-decoration: none; border-color: var(--border-strong); }
+.route-card__title { font-weight: 800; font-size: 1.05rem; }
+.route-card__meta { color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
+.route-card__foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: var(--sp-2);
+  border-top: 1px solid var(--glass-border);
+}
+.fare { color: var(--rajahamsa); font-weight: 800; font-family: var(--font-mono); font-size: 1.1rem; }
+
+/* ---- How it works ---- */
+.step { display: flex; gap: var(--sp-3); align-items: flex-start; }
+.step__num {
+  flex: 0 0 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--glass-border);
+  color: var(--express);
+  font-weight: 800;
+  font-size: 1.1rem;
+  font-family: var(--font-mono);
+}
+.step__title { font-weight: 700; margin-bottom: var(--sp-1); }
+.step__text { color: var(--muted); font-size: 0.9rem; margin-bottom: 0; line-height: 1.6; }
+
+.disclaimer { color: var(--muted); font-size: 0.85rem; }
+
+/* ---- Toast container ---- */
+.toast-container { position: fixed; bottom: var(--sp-5); right: var(--sp-5); z-index: 9999; display: flex; flex-direction: column; gap: var(--sp-2); pointer-events: none; }
+.toast {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  padding: var(--sp-2) var(--sp-4);
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+  font-size: 0.85rem;
+  max-width: 360px;
+  pointer-events: auto;
+  animation: toast-in 0.3s ease-out;
+  
+  -webkit-
+}
+.toast--error { border-color: var(--status-offline); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 820px) {
+  .search-card { grid-template-columns: 1fr 1fr; }
+  .search-card .btn { grid-column: 1 / -1; }
+}
+@media (max-width: 520px) {
+  .search-card { grid-template-columns: 1fr; }
+  .swap-btn { display: none; }
+}
+
+/* ---- Seats ---- */
+.seat-grid { display: grid; gap: var(--sp-2); justify-content: center; }
+.seat-grid--seater { grid-template-columns: repeat(4, 44px); }
+.seat-grid--sleeper { grid-template-columns: repeat(3, 56px); }
+.seat {
+  width: 44px; height: 44px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: grid; place-items: center;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s;
+}
+.seat:hover { transform: translateY(-1px); }
+.seat--available { background: var(--surface-2); }
+.seat--selected { background: var(--express); color: #06122B; border-color: var(--express); }
+.seat--booked { background: #1F2937; color: var(--muted); cursor: not-allowed; }
+.seat--locked { background: #78350F; color: #FBBF24; cursor: not-allowed; }
+.seat--ladies { background: #831843; color: #F9A8D4; }
+
+/* ---- Fare summary ---- */
+.fare-summary { font-size: 0.85rem; color: var(--muted); line-height: 1.8; }
+.fare-total { font-size: 1.5rem; font-weight: 800; font-family: var(--font-mono); color: var(--rajahamsa); }

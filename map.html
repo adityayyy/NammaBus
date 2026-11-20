@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NammaBus - simulated Karnataka bus map. Not an official KSRTC service.">
+  <title>NammaBus — Map</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})();</script>
+  <link rel="stylesheet" href="css/base.css?v=9">
+  <link rel="stylesheet" href="css/layout.css?v=9">
+  <link rel="stylesheet" href="css/components.css?v=9">
+  <link rel="stylesheet" href="lib/leaflet.css?v=9">
+  <link rel="stylesheet" href="css/map.css?v=9">
+  <link rel="stylesheet" href="css/pages.css?v=9">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html" aria-label="NammaBus home">
+        nammabus<span class="brand__cursor"></span>
+      </a>
+
+      <nav class="site-nav" aria-label="Main navigation">
+        <a class="nav-link" href="index.html" data-i18n="nav.home">Home</a>
+        <a class="nav-link" href="map.html" aria-current="page" data-i18n="nav.map">Map</a>
+        <a class="nav-link" href="bookings.html" data-i18n="nav.bookings">My Bookings</a>
+        <a class="nav-link" href="admin.html" data-i18n="nav.admin">Admin</a>
+      </nav>
+
+      <div class="header-actions">
+        <span class="status-chip status-chip--simulated" id="statusChip"><span class="ticker-dot"></span> SIMULATED - TICK 2S</span>
+        <button id="langToggle" class="nav-link" type="button" aria-label="Toggle language">ಕ</button>
+        <button id="themeToggle" class="btn btn--sm" type="button" aria-label="Toggle theme">LIGHT</button>
+        <button id="view3dBtn" class="btn btn--sm" type="button" aria-label="3D view">3D</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="map-page">
+    <div id="map"></div>
+    <div id="map3d" style="position:absolute;inset:0;z-index:1;display:none;"></div>
+
+    <!-- Left sidebar -->
+    <button id="expandSidebarBtn" class="sidebar-toggle sidebar-toggle--expand" aria-label="Expand sidebar" aria-expanded="false" hidden>›</button>
+
+    <div class="left-stack" id="leftStack">
+      <button id="collapseSidebarBtn" class="sidebar-toggle sidebar-toggle--collapse" aria-label="Collapse sidebar" aria-expanded="true">‹</button>
+
+      <section class="search-float" aria-label="Route search">
+        <div class="search-row">
+          <div class="field">
+            <label for="fromCity" data-i18n="search.from">From</label>
+            <select id="fromCity"></select>
+          </div>
+          <button class="swap" id="swapCities" type="button" title="Swap" aria-label="Swap cities">⇄</button>
+          <div class="field">
+            <label for="toCity" data-i18n="search.to">To</label>
+            <select id="toCity"></select>
+          </div>
+        </div>
+        <div class="search-actions">
+          <div class="field" style="flex:1">
+            <label for="travelDate" data-i18n="search.date">Date</label>
+            <input id="travelDate" type="date">
+          </div>
+          <button id="searchBtn" class="btn btn--primary" type="button" data-i18n="search.search">Search</button>
+        </div>
+      </section>
+
+      <div class="chips-float" role="group" aria-label="Filter by bus type">
+        <button class="chip" data-filter="all" aria-pressed="true">All</button>
+        <button class="chip" data-filter="ordinary" aria-pressed="false">Ordinary</button>
+        <button class="chip" data-filter="express" aria-pressed="false">Express</button>
+        <button class="chip" data-filter="rajahamsa" aria-pressed="false">Rajahamsa</button>
+        <button class="chip" data-filter="airavat" aria-pressed="false">Airavat</button>
+      </div>
+
+      <aside id="sidePanel" class="side-panel">
+        <div class="side-panel__head">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <h2 class="side-panel__title" data-i18n="map.buses">Buses on this route</h2>
+            <button id="panelToggle" class="panel-toggle" aria-label="Toggle bus list" aria-expanded="true">‹</button>
+          </div>
+          <p class="side-panel__meta" id="panelMeta" data-i18n="map.meta.default">All active buses</p>
+          <div style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:0.82rem;">
+            <span id="liveClock" style="font-weight:800; font-family: var(--font-mono);">--:--:--</span>
+            <span id="timeModeLabel" class="badge badge--sim">Real time</span>
+          </div>
+        </div>
+        <div id="busList" class="side-panel__body"></div>
+        <details class="side-panel__clock">
+          <summary data-i18n="map.timetravel">Developer: time travel</summary>
+          <div style="padding-top:6px;display:flex;flex-direction:column;gap:6px;">
+            <div class="time-slider-row">
+              <input id="timeSlider" type="range" min="0" max="1439" value="720">
+              <span id="timeSliderLabel" class="time-label">12:00</span>
+            </div>
+            <div class="time-marks"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>
+            <div class="speed-row">
+              <button class="speed-btn btn btn--sm" data-speed="1">1x</button>
+              <button class="speed-btn btn btn--sm" data-speed="10">10x</button>
+              <button class="speed-btn btn btn--sm" data-speed="60">60x</button>
+              <button id="realTimeBtn" class="btn btn--sm" type="button">Now</button>
+            </div>
+          </div>
+        </details>
+      </aside>
+    </div>
+
+    <!-- Detail card -->
+    <article id="detailCard" class="detail-card" hidden>
+      <div class="detail-card__head">
+        <h3 class="detail-card__title" id="detailTitle">Bus</h3>
+        <button class="detail-card__close" id="detailClose" aria-label="Close">×</button>
+      </div>
+      <div class="detail-card__meta" id="detailMeta"></div>
+      <div class="detail-card__timeline" id="detailTimeline"></div>
+      <div style="display:flex;gap:8px;">
+        <button id="bookSeatsBtn" class="btn btn--primary" type="button" style="flex:1" data-i18n="map.book">Book seats →</button>
+      </div>
+    </article>
+
+    <!-- Floating buttons (right) -->
+    <div class="float-buttons">
+      <button id="fullscreenBtn" class="float-btn" data-i18n-attr="title:tip.fullscreen|aria-label:tip.fullscreen">⛶
+        <span class="tooltip" data-i18n="tip.fullscreen">Full screen</span>
+      </button>
+      <button id="recenterBtn" class="float-btn" data-i18n-attr="title:tip.recenter|aria-label:tip.recenter">◎
+        <span class="tooltip" data-i18n="tip.recenter">Re-centre</span>
+      </button>
+    </div>
+
+    <!-- Legend: top-right, collapsible -->
+    <div class="legend-collapsible">
+      <details>
+        <summary data-i18n="map.legend">Legend</summary>
+        <div style="margin-top:6px;display:flex;flex-direction:column;gap:4px;">
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--crowd-good);margin-right:6px;"></span>Many seats free</span>
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--crowd-mid);margin-right:6px;"></span>Filling up</span>
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--crowd-low);margin-right:6px;"></span>Nearly full</span>
+          <span style="margin-top:4px;">Colored line = selected route (service type)</span>
+        </div>
+      </details>
+    </div>
+  </main>
+
+  <script src="lib/leaflet.js"></script>
+  <script src="js/config.js?v=4"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css">
+  <script src="js/i18n.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/sim.js"></script>
+  <script src="js/liveFeed.js"></script>
+  <script src="js/graph.js"></script>
+  <script src="js/buses.js?v=2"></script>
+  <div class="page-transition" id="pageTransition"></div>
+  <script src="js/map.js?v=4"></script>
+  <script src="js/map3d.js?v=3"></script>
+  <script>
+    (function () {
+      var overlay = document.getElementById('pageTransition');
+      var map2d = document.getElementById('map');
+      var map3d = document.getElementById('map3d');
+      var btn3d = document.getElementById('view3dBtn');
+      var btn2d = document.getElementById('view2dBtn');
+      // btn2d may not exist in 2D page; create a floating 2D toggle when in 3D mode instead
+      var in3d = false;
+
+      function show2d() {
+        in3d = false;
+        // animate the 3D camera flying out (zoom out, flatten) before switching
+        try {
+          if (window.map3d) {
+            var c3 = window.map3d.getCenter();
+            window.map3d.flyTo({ center: c3, zoom: 4, pitch: 0, bearing: 0, duration: 0.5, essential: true });
+          }
+        } catch (e) {}
+        if (overlay) overlay.classList.add('is-active');
+        setTimeout(function () {
+          if (map3d) map3d.style.display = 'none';
+          if (map2d) map2d.style.display = '';
+          if (btn3d) btn3d.style.display = '';
+          if (btn2d) btn2d.style.display = 'none';
+          // fly the 2D map in from a zoomed-out state
+          try {
+            var c = (window.map3d && window.map3d.getCenter) ? window.map3d.getCenter() : null;
+            var lat = c ? c.lat : 15.3173, lng = c ? c.lng : 75.7139;
+            window.map.setView([lat, lng], 4, { animate: false });
+            setTimeout(function () {
+              window.map.flyTo([lat, lng], 7, { animate: true, duration: 1.1 });
+            }, 80);
+          } catch (e) {}
+          try { window.map.invalidateSize(); } catch (e) {}
+          requestAnimationFrame(function () { requestAnimationFrame(function () { if (overlay) overlay.classList.remove('is-active'); }); });
+        }, 520);
+      }
+      function show3d() {
+        in3d = true;
+        if (map2d) map2d.style.display = 'none';
+        if (map3d) map3d.style.display = '';
+        if (btn3d) btn3d.style.display = 'none';
+        if (btn2d) btn2d.style.display = '';
+        if (overlay) { overlay.classList.add('is-active'); requestAnimationFrame(function(){ requestAnimationFrame(function(){ overlay.classList.remove('is-active'); }); }); }
+        try { if (window.map3d) window.map3d.resize(); } catch(e){}
+        // sync camera from 2D view
+        try {
+          var c = window.map.getCenter();
+          if (window.map3d) window.map3d.jumpTo({ center: [c.lng, c.lat], zoom: window.map.getZoom(), pitch: 0, bearing: 0 });
+          setTimeout(function () {
+            if (window.map3d) window.map3d.flyTo({ center: [c.lng, c.lat], zoom: Math.max(window.map.getZoom(), 7), pitch: 60, bearing: -20, duration: 1100, essential: true });
+          }, 80);
+        } catch(e){}
+      }
+
+      // Ensure a 2D toggle button exists
+      if (!btn2d) {
+        btn2d = document.createElement('button');
+        btn2d.id = 'view2dBtn';
+        btn2d.className = 'btn btn--sm';
+        btn2d.type = 'button';
+        btn2d.setAttribute('aria-label', '2D view');
+        btn2d.textContent = '2D';
+        btn2d.style.display = 'none';
+        // place near the 3D button's parent if possible
+        if (btn3d && btn3d.parentNode) btn3d.parentNode.appendChild(btn2d);
+        else document.body.appendChild(btn2d);
+      }
+
+      if (btn3d) btn3d.addEventListener('click', show3d);
+      if (btn2d) btn2d.addEventListener('click', show2d);
+
+      // Auto-open 3D if linked via map.html#3d
+      if (location.hash === '#3d') {
+        if (window.map3d) show3d();
+        else window.addEventListener('map3d:ready', function () { show3d(); }, { once: true });
+      }
+    })();
+  </script>
+  <script src="js/theme.js?v=3"></script>
+</body>
+</html>

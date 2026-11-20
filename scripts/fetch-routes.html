@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Fetch routes — helper</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+    button { padding: 10px 16px; font-size: 1rem; cursor: pointer; }
+    pre { background: #f3f4f6; padding: 1rem; border-radius: 8px; max-height: 40vh; overflow: auto; font-size: 0.8rem; }
+    .log { color: #555; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h1>Fetch real road geometry (OSRM)</h1>
+  <p>Click the button to query the public OSRM routing API for each city pair and download <code>routes.json</code>. Run this once; the app reads the saved JSON at runtime (no routing API calls in the app).</p>
+  <button id="go">Fetch all routes</button>
+  <p class="log" id="status">Idle.</p>
+  <pre id="out"></pre>
+
+  <script>
+    const cities = {
+      belagavi:   { lat: 15.8497, lng: 74.4977 },
+      dharwad:    { lat: 15.4589, lng: 75.0078 },
+      hubballi:   { lat: 15.3647, lng: 75.1240 },
+      vijayapura: { lat: 16.8302, lng: 75.7100 },
+      bengaluru:  { lat: 12.9716, lng: 77.5946 },
+      mysuru:     { lat: 12.2958, lng: 76.6394 },
+      mangaluru:  { lat: 12.9141, lng: 74.8560 },
+      ballari:    { lat: 15.1394, lng: 76.9214 }
+    };
+    const pairs = [
+      ['belagavi','hubballi'], ['belagavi','dharwad'], ['belagavi','bengaluru'],
+      ['hubballi','bengaluru'], ['bengaluru','mysuru'], ['bengaluru','mangaluru'],
+      ['belagavi','vijayapura'], ['bengaluru','ballari']
+    ];
+
+    document.getElementById('go').addEventListener('click', async () => {
+      const status = document.getElementById('status');
+      const out = document.getElementById('out');
+      const result = {};
+      for (const [a, b] of pairs) {
+        status.textContent = 'Fetching ' + a + ' -> ' + b + '…';
+        const ca = cities[a], cb = cities[b];
+        const url = 'https://router.project-osrm.org/route/v1/driving/' +
+          ca.lng + ',' + ca.lat + ';' + cb.lng + ',' + cb.lat +
+          '?overview=full&geometries=geojson';
+        const resp = await fetch(url);
+        const json = await resp.json();
+        const coords = json.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+        result[a + '-' + b] = {
+          from: a, to: b,
+          distance_km: Math.round(json.routes[0].distance / 1000 * 10) / 10,
+          duration_min: Math.round(json.routes[0].duration / 60),
+          coords: coords
+        };
+      }
+      const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'routes.json';
+      a.click();
+      status.textContent = 'Done. Save the file as /data/routes.json';
+      out.textContent = JSON.stringify(result, null, 2).slice(0, 2000) + '…';
+    });
+  </script>
+</body>
+</html>

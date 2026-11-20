@@ -1,0 +1,148 @@
+/* ============================================================
+   NammaBus - components.css
+   Stratum-inspired: flat, sharp, monospace.
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 2px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.btn:hover { background: var(--surface-2); text-decoration: none; }
+.btn:active { transform: none; }
+.btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.btn--primary {
+  background: var(--green);
+  border: 1px solid var(--green);
+  color: #000000;
+  font-weight: 700;
+}
+.btn--primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn--ghost { background: transparent; border-color: var(--border); color: var(--muted); }
+.btn--ghost:hover { color: var(--text); border-color: var(--border-strong); }
+.btn--sm { padding: 4px 8px; font-size: 0.7rem; }
+.btn--lg { padding: 8px 16px; font-size: 0.8rem; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 16px;
+}
+.card--hover { transition: background 0.15s ease, border-color 0.15s ease; }
+.card--hover:hover { background: var(--surface-2); border-color: var(--border-strong); }
+
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; font-family: var(--font-mono); }
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--green);
+  outline: none;
+}
+.field input::placeholder { color: var(--muted); opacity: 0.5; }
+
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-mono);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--muted);
+}
+.badge--ordinary { color: var(--ordinary); border-color: var(--ordinary); }
+.badge--express { color: var(--express); border-color: var(--express); }
+.badge--rajahamsa { color: var(--rajahamsa); border-color: var(--rajahamsa); }
+.badge--airavat { color: var(--airavat); border-color: var(--airavat); }
+.badge--sim { color: var(--muted); border-color: var(--border); }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.chip:hover { color: var(--text); border-color: var(--border-strong); }
+.chip[aria-pressed="true"] { background: var(--surface-2); color: var(--text); border-color: var(--text); }
+
+.empty-state {
+  text-align: center;
+  padding: 24px 16px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: var(--font-mono);
+}
+.empty-state strong { display: block; color: var(--text); margin-bottom: 4px; }
+
+.fare { color: var(--rajahamsa); font-weight: 700; font-family: var(--font-mono); }
+.fare-summary { font-size: 0.8rem; color: var(--muted); line-height: 1.8; font-family: var(--font-mono); }
+.fare-total { font-size: 1.2rem; font-weight: 700; font-family: var(--font-mono); color: var(--rajahamsa); }
+
+.seat-grid { display: grid; gap: 4px; justify-content: center; }
+.seat-grid--seater { grid-template-columns: repeat(4, 40px); }
+.seat-grid--sleeper { grid-template-columns: repeat(3, 52px); }
+.seat {
+  width: 40px; height: 40px;
+  border-radius: 2px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: grid; place-items: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  font-family: var(--font-mono);
+}
+.seat:hover { background: var(--surface); }
+.seat--available { background: var(--surface-2); }
+.seat--selected { background: var(--green); color: #000; border-color: var(--green); }
+.seat--booked { background: var(--surface); color: var(--muted); cursor: not-allowed; }
+.seat--locked { background: #3b1f00; color: var(--amber); cursor: not-allowed; border-color: var(--amber); }
+.seat--ladies { background: #2d1020; color: var(--pink); border-color: var(--pink); }
+
+.toast { background: var(--surface); border: 1px solid var(--border); border-radius: 2px; padding: 8px 12px; color: var(--text); font-size: 0.8rem; font-family: var(--font-mono); }
+.toast--error { border-color: var(--pink); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }

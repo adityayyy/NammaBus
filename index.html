@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NammaBus - a student prototype for simulated Karnataka bus tracking and seat booking. Not an official KSRTC service.">
+  <title>NammaBus — Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})();</script>
+  <link rel="stylesheet" href="css/base.css?v=8">
+  <link rel="stylesheet" href="css/layout.css?v=8">
+  <link rel="stylesheet" href="css/components.css?v=8">
+  <link rel="stylesheet" href="css/map.css?v=8">
+  <link rel="stylesheet" href="css/pages.css?v=8">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html" aria-label="NammaBus home">
+        nammabus<span class="brand__cursor"></span>
+      </a>
+
+      <nav class="site-nav" aria-label="Main navigation">
+        <a class="nav-link" href="index.html" aria-current="page" data-i18n="nav.home">Home</a>
+        <a class="nav-link" href="map.html" data-i18n="nav.map">Map</a>
+        <a class="nav-link" href="bookings.html" data-i18n="nav.bookings">My Bookings</a>
+        <a class="nav-link" href="admin.html" data-i18n="nav.admin">Admin</a>
+      </nav>
+
+      <div class="header-actions">
+        <span class="status-chip status-chip--simulated" id="statusChip"><span class="ticker-dot"></span> SIMULATED - TICK 2S</span>
+        <button id="langToggle" class="nav-link" type="button" aria-label="Toggle language">ಕ</button>
+        <button id="themeToggle" class="btn btn--sm" type="button" aria-label="Toggle theme">LIGHT</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div style="display:grid;grid-template-columns:1fr 1px 1fr;gap:0;min-height:400px;">
+          <!-- Left: headline + command -->
+          <div style="padding:48px 32px 48px 0;display:flex;flex-direction:column;justify-content:center;">
+            <h1 style="font-size:clamp(3rem,8vw,4.5rem);line-height:0.95;margin:0 0 24px;letter-spacing:-0.03em;">
+              <span style="color:var(--green);">Every bus.</span><br>
+              <span style="color:var(--pink);">One live map.</span>
+            </h1>
+            <p style="color:var(--text-dim);font-size:0.85rem;max-width:48ch;line-height:1.7;margin:0 0 32px;">
+              Karnataka routes tracked in real time. Simulated buses move on the map so you can compare ETAs, pick seats and book before you leave.
+            </p>
+            <div style="display:flex;align-items:stretch;gap:0;border:1px solid var(--border);background:var(--surface);">
+              <span style="padding:10px 14px;color:var(--muted);font-size:0.8rem;border-right:1px solid var(--border);">$</span>
+              <span style="padding:10px 14px;flex:1;font-size:0.8rem;color:var(--text);">belagavi -&gt; bengaluru</span>
+              <a href="map.html?from=belagavi&to=bengaluru" class="btn btn--primary" style="border-radius:0;border:none;">OPEN ON MAP -&gt;</a>
+            </div>
+            <p style="color:var(--muted);font-size:0.7rem;margin:8px 0 0;">Simulated data. Not an official KSRTC service.</p>
+          </div>
+          <!-- Divider -->
+          <div style="background:var(--border);"></div>
+          <!-- Right: code panel -->
+          <div style="padding:48px 0 48px 32px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="border:1px solid var(--border);background:var(--panel);">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);">
+                <span style="display:flex;align-items:center;gap:8px;font-size:0.7rem;color:var(--muted);">
+                  <span style="width:6px;height:6px;background:var(--green);display:inline-block;"></span>
+                  trip.toml - belagavi to bengaluru
+                </span>
+                <span style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">click a value</span>
+              </div>
+              <div style="padding:12px 16px;font-size:0.8rem;line-height:1.8;color:var(--text-dim);">
+                <div><span style="color:var(--muted);"># click a value; the map follows</span></div>
+                <div><span style="color:var(--pink);">[trip]</span></div>
+                <div>from&nbsp;&nbsp;&nbsp;&nbsp;= <span class="interactive-value" style="color:var(--green);">"belagavi"</span></div>
+                <div>to&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span class="interactive-value" style="color:var(--green);">"bengaluru"</span></div>
+                <div>date&nbsp;&nbsp;&nbsp;&nbsp;= <span class="interactive-value" style="color:var(--amber);">2026-11-20</span></div>
+                <div>service&nbsp;= <span class="interactive-value" style="color:var(--pink);">["express", "rajahamsa"]</span></div>
+              </div>
+              <div style="padding:8px 12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:0.7rem;">
+                <span style="color:var(--muted);">MATCHED - 2 BUSES</span>
+                <div class="seg-bar"><span class="seg lit"></span><span class="seg lit"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container section">
+      <div class="section__head">
+        <div>
+          <h2 class="section__title" data-i18n="popular.title">Popular routes</h2>
+          <p class="section__sub" data-i18n="popular.sub">Tap a card to open it on the live map. All times and fares are demo values.</p>
+        </div>
+        <span class="status-chip status-chip--simulated">Simulated · 0s ago</span>
+      </div>
+
+      <div class="grid grid--3">
+        <a class="card card--hover route-card" href="map.html?from=belagavi&to=hubballi">
+          <span class="badge badge--express">Express</span>
+          <span class="route-card__title">Belagavi → Hubballi</span>
+          <span class="route-card__meta">2h 15m · via Dharwad · 3 buses</span>
+          <span class="route-card__foot"><span class="fare">₹180</span><span>View map →</span></span>
+        </a>
+
+        <a class="card card--hover route-card" href="map.html?from=belagavi&to=bengaluru">
+          <span class="badge badge--rajahamsa">Rajahamsa</span>
+          <span class="route-card__title">Belagavi → Bengaluru</span>
+          <span class="route-card__meta">8h 30m · via Hubballi · 2 buses</span>
+          <span class="route-card__foot"><span class="fare">₹520</span><span>View map →</span></span>
+        </a>
+
+        <a class="card card--hover route-card" href="map.html?from=belagavi&to=dharwad">
+          <span class="badge badge--ordinary">Ordinary</span>
+          <span class="route-card__title">Belagavi → Dharwad</span>
+          <span class="route-card__meta">1h 20m · direct · 2 buses</span>
+          <span class="route-card__foot"><span class="fare">₹110</span><span>View map →</span></span>
+        </a>
+
+        <a class="card card--hover route-card" href="map.html?from=hubballi&to=bengaluru">
+          <span class="badge badge--airavat">Airavat</span>
+          <span class="route-card__title">Hubballi → Bengaluru</span>
+          <span class="route-card__meta">7h 45m · via Davangere · 2 buses</span>
+          <span class="route-card__foot"><span class="fare">₹470</span><span>View map →</span></span>
+        </a>
+
+        <a class="card card--hover route-card" href="map.html?from=bengaluru&to=mysuru">
+          <span class="badge badge--express">Express</span>
+          <span class="route-card__title">Bengaluru → Mysuru</span>
+          <span class="route-card__meta">2h 30m · direct · 3 buses</span>
+          <span class="route-card__foot"><span class="fare">₹210</span><span>View map →</span></span>
+        </a>
+
+        <a class="card card--hover route-card" href="map.html?from=bengaluru&to=mangaluru">
+          <span class="badge badge--rajahamsa">Rajahamsa</span>
+          <span class="route-card__title">Bengaluru → Mangaluru</span>
+          <span class="route-card__meta">8h 00m · direct · 2 buses</span>
+          <span class="route-card__foot"><span class="fare">₹540</span><span>View map →</span></span>
+        </a>
+      </div>
+    </section>
+
+    <section class="container section">
+      <div class="section__head">
+        <div>
+          <h2 class="section__title" data-i18n="how.title">How it works</h2>
+          <p class="section__sub" data-i18n="how.sub">Four steps from search to ticket.</p>
+        </div>
+      </div>
+
+      <div class="grid grid--4">
+        <div class="card step">
+          <span class="step__num">1</span>
+          <div><p class="step__title" data-i18n="how.s1">Search a route</p><p class="step__text" data-i18n="how.s1d">Pick where you start, where you go and the date.</p></div>
+        </div>
+        <div class="card step">
+          <span class="step__num">2</span>
+          <div><p class="step__title" data-i18n="how.s2">Watch the map</p><p class="step__text" data-i18n="how.s2d">Follow simulated buses and compare ETAs.</p></div>
+        </div>
+        <div class="card step">
+          <span class="step__num">3</span>
+          <div><p class="step__title" data-i18n="how.s3">Pick your seats</p><p class="step__text" data-i18n="how.s3d">Choose a 2+2 seat layout; seats lock for 5 minutes.</p></div>
+        </div>
+        <div class="card step">
+          <span class="step__num">4</span>
+          <div><p class="step__title" data-i18n="how.s4">Get a ticket</p><p class="step__text" data-i18n="how.s4d">Complete the demo payment and print your ticket.</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <span data-i18n="footer.protocol">NammaBus · Student prototype, not an official KSRTC/BMTC service.</span>
+      <span class="disclaimer" data-i18n="footer.demo">All buses, fares and payments are simulated. No real money is handled.</span>
+    </div>
+  </footer>
+
+  <script src="js/i18n.js"></script>
+  <script>
+    // no-op: hero is now a static command + code panel
+  </script>
+  <script src="js/theme.js?v=3"></script>
+</body>
+</html>

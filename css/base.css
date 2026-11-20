@@ -1,0 +1,174 @@
+/* ============================================================
+   NammaBus - base.css
+   Stratum-inspired: flat, sharp, monospace, no glass.
+   ============================================================ */
+
+:root {
+  --bg: #050505;
+  --panel: #0A0A0B;
+  --raised: #101012;
+  --surface: #0A0A0B;
+  --surface-2: #101012;
+  --surface-solid: #0A0A0B;
+  --text: #F2F2F2;
+  --text-dim: #8A8F98;
+  --muted: #8A8F98;
+
+  --border: rgba(255,255,255,0.09);
+  --border-strong: rgba(255,255,255,0.18);
+  --shadow: none;
+  --shadow-lg: none;
+  --glow: none;
+  --glow-strong: none;
+
+  --glass-bg: #0A0A0B;
+  --glass-border: rgba(255,255,255,0.09);
+  --glass-blur: none;
+
+  --green: #39FF6A;
+  --green-dim: #1E6B34;
+  --pink: #FF3DBE;
+  --pink-dim: #7A1F5E;
+  --amber: #FFC247;
+
+  --ordinary: #8A8F98;
+  --express: #39FF6A;
+  --rajahamsa: #FF3DBE;
+  --airavat: #FFC247;
+
+  --crowd-good: #39FF6A;
+  --crowd-mid: #FFC247;
+  --crowd-low: #FF3DBE;
+
+  --status-live: #39FF6A;
+  --status-simulated: #FFC247;
+  --status-offline: #FF3DBE;
+
+  --accent: #39FF6A;
+  --accent-hover: #6FFF9A;
+
+  --r: 0px;
+  --r-lg: 2px;
+  --r-md: 2px;
+  --r-sm: 0px;
+  --r-pill: 2px;
+
+  --font-ui: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Monaco', monospace;
+  --font-display: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Monaco', monospace;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Monaco', monospace;
+}
+
+body[data-theme="light"] {
+  --bg: #F4F4EF;
+  --panel: #FFFFFF;
+  --raised: #ECECEA;
+  --surface: #FFFFFF;
+  --surface-2: #ECECEA;
+  --surface-solid: #FFFFFF;
+  --text: #0A0A0B;
+  --text-dim: #525252;
+  --muted: #8A8F98;
+  --border: rgba(0,0,0,0.09);
+  --border-strong: rgba(0,0,0,0.18);
+  --shadow: none;
+  --shadow-lg: none;
+  --glow: none;
+  --glow-strong: none;
+  --glass-bg: #FFFFFF;
+  --glass-border: rgba(0,0,0,0.09);
+  --glass-blur: none;
+  --green: #00A83A;
+  --green-dim: #C6F0D0;
+  --pink: #D1007F;
+  --pink-dim: #F5C6E0;
+  --amber: #B87300;
+  --ordinary: #8A8F98;
+  --express: #00A83A;
+  --rajahamsa: #D1007F;
+  --airavat: #B87300;
+  --crowd-good: #00A83A;
+  --crowd-mid: #B87300;
+  --crowd-low: #D1007F;
+  --status-live: #00A83A;
+  --status-simulated: #B87300;
+  --status-offline: #D1007F;
+  --accent: #00A83A;
+  --accent-hover: #00C84A;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 { margin-top: 0; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
+p { margin-top: 0; margin-bottom: var(--sp-3); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+img, svg { max-width: 100%; display: block; }
+button, input, select, textarea { font: inherit; color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+  border-radius: 0;
+}
+
+.container { width: 100%; max-width: 1400px; margin: 0 auto; padding: 0 16px; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 0; }
+
+/* Utility */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* Blinking cursor */
+@keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+.block-cursor { display: inline-block; width: 0.6em; height: 1em; background: var(--green); vertical-align: text-bottom; animation: blink 1s step-end infinite; }
+@media (prefers-reduced-motion: reduce) { .block-cursor { animation: none; } }
+
+/* Dashed underline for interactive values */
+.interactive-value { border-bottom: 1px dashed var(--muted); cursor: pointer; }
+.interactive-value:hover { border-bottom-color: var(--green); color: var(--green); }
+
+/* Segmented progress bar */
+.seg-bar { display: flex; gap: 2px; }
+.seg-bar .seg { width: 8px; height: 8px; background: var(--surface-2); border: 1px solid var(--border); }
+.seg-bar .seg.lit { background: var(--green); border-color: var(--green); }
+
+/* Tiny uppercase label */
+.label-xs { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-family: var(--font-mono); }
+
+/* Big numeral */
+.numeral { font-size: 2rem; font-weight: 700; line-height: 1; font-family: var(--font-mono); letter-spacing: -0.03em; }
+.numeral-lg { font-size: 3.5rem; font-weight: 700; line-height: 1; font-family: var(--font-mono); letter-spacing: -0.03em; }
+
+/* Ticker dot */
+.ticker-dot { width: 6px; height: 6px; background: var(--green); display: inline-block; animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+@media (prefers-reduced-motion: reduce) { .ticker-dot { animation: none; } }
+
+/* Toast */
+.toast { background: var(--surface); border: 1px solid var(--border); border-radius: 2px; padding: 8px 12px; color: var(--text); font-size: 0.8rem; font-family: var(--font-mono); }
+.toast--error { border-color: var(--pink); }

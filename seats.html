@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NammaBus - seat selection. Demo data.">
+  <title>NammaBus — Seats</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})();</script>
+  <link rel="stylesheet" href="css/base.css?v=8">
+  <link rel="stylesheet" href="css/layout.css?v=8">
+  <link rel="stylesheet" href="css/components.css?v=8">
+  <link rel="stylesheet" href="css/pages.css?v=8">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html" aria-label="NammaBus home">
+        nammabus<span class="brand__cursor"></span>
+      </a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a class="nav-link" href="index.html" data-i18n="nav.home">Home</a>
+        <a class="nav-link" href="map.html" data-i18n="nav.map">Map</a>
+        <a class="nav-link" href="bookings.html" data-i18n="nav.bookings">My Bookings</a>
+        <a class="nav-link" href="admin.html" data-i18n="nav.admin">Admin</a>
+      </nav>
+      <div class="header-actions">
+        <span class="status-chip status-chip--simulated" id="statusChip"><span class="ticker-dot"></span> SIMULATED - TICK 2S</span>
+        <button id="langToggle" class="nav-link" type="button" aria-label="Toggle language">ಕ</button>
+        <button id="themeToggle" class="btn btn--sm" type="button" aria-label="Toggle theme">LIGHT</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container section">
+    <div class="section__head">
+      <div>
+        <h1 class="section__title">Select seats</h1>
+        <p class="section__sub" id="tripSummary">Loading trip…</p>
+      </div>
+      <a class="btn btn--sm" href="map.html">← Back to map</a>
+    </div>
+
+    <div id="lockBar" class="card" style="position:sticky;top:76px;z-index:20;display:none;margin-bottom:var(--sp-4);">
+      <div style="display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap;">
+        <span>Seats locked for <strong id="lockTimer">05:00</strong></span>
+        <span style="color:var(--muted);font-size:0.85rem;">Complete payment before the timer ends or seats are released.</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 360px;gap:var(--sp-4);align-items:start;">
+      <div>
+        <div class="card" style="margin-bottom:var(--sp-4);">
+          <div style="display:flex;flex-wrap:wrap;gap:var(--sp-3);font-size:0.8rem;">
+            <span><span class="seat seat--available" style="display:inline-block;width:18px;height:18px;vertical-align:middle;margin-right:var(--sp-1);"></span>Available</span>
+            <span><span class="seat seat--selected" style="display:inline-block;width:18px;height:18px;vertical-align:middle;margin-right:var(--sp-1);"></span>Selected</span>
+            <span><span class="seat seat--booked" style="display:inline-block;width:18px;height:18px;vertical-align:middle;margin-right:var(--sp-1);"></span>Booked</span>
+            <span><span class="seat seat--locked" style="display:inline-block;width:18px;height:18px;vertical-align:middle;margin-right:var(--sp-1);"></span>Locked</span>
+            <span><span class="seat seat--ladies" style="display:inline-block;width:18px;height:18px;vertical-align:middle;margin-right:var(--sp-1);"></span>Ladies</span>
+          </div>
+          <div style="margin-top:var(--sp-3);display:flex;gap:var(--sp-2);flex-wrap:wrap;">
+            <button id="autoPickBtn" class="btn btn--sm" type="button">Pick 2 together</button>
+            <span style="color:var(--muted);font-size:0.8rem;align-self:center;">Max 6 seats per booking</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div id="seatGrid" class="seat-grid"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom:var(--sp-4);">
+          <h3 style="margin:0 0 var(--sp-2);">Fare summary</h3>
+          <div id="fareSummary" class="fare-summary"></div>
+          <div class="fare-total">Total: ₹<span id="totalFare">0</span></div>
+          <p style="color:var(--muted);font-size:0.75rem;margin-top:var(--sp-2);">Estimated fare, demo data.</p>
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 var(--sp-2);">Passenger details</h3>
+          <div id="passengerForms"></div>
+          <button id="proceedBtn" class="btn btn--primary" type="button" style="width:100%;margin-top:var(--sp-3);" disabled>Proceed to payment</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <span>NammaBus · Student prototype.</span>
+      <span class="disclaimer">All seats and fares are simulated. No real money.</span>
+    </div>
+  </footer>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/graph.js"></script>
+  <script src="js/seats.js"></script>
+  <script src="js/theme.js?v=3"></script>
+</body>
+</html>
