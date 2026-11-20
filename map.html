@@ -27,7 +27,6 @@
       <nav class="site-nav" aria-label="Main navigation">
         <a class="nav-link" href="index.html" data-i18n="nav.home">Home</a>
         <a class="nav-link" href="map.html" aria-current="page" data-i18n="nav.map">Map</a>
-        <a class="nav-link" href="bookings.html" data-i18n="nav.bookings">My Bookings</a>
         <a class="nav-link" href="admin.html" data-i18n="nav.admin">Admin</a>
       </nav>
 
@@ -45,28 +44,16 @@
     <div id="map3d" style="position:absolute;inset:0;z-index:1;display:none;"></div>
 
     <!-- Left sidebar -->
-    <button id="expandSidebarBtn" class="sidebar-toggle sidebar-toggle--expand" aria-label="Expand sidebar" aria-expanded="false" hidden>›</button>
-
     <div class="left-stack" id="leftStack">
-      <button id="collapseSidebarBtn" class="sidebar-toggle sidebar-toggle--collapse" aria-label="Collapse sidebar" aria-expanded="true">‹</button>
 
       <section class="search-float" aria-label="Route search">
         <div class="search-row">
-          <div class="field">
-            <label for="fromCity" data-i18n="search.from">From</label>
-            <select id="fromCity"></select>
-          </div>
-          <button class="swap" id="swapCities" type="button" title="Swap" aria-label="Swap cities">⇄</button>
-          <div class="field">
-            <label for="toCity" data-i18n="search.to">To</label>
-            <select id="toCity"></select>
+          <div class="field" style="flex:1">
+            <label for="routeQuery">Bus route (e.g. 335, 600)</label>
+            <input id="routeQuery" type="text" placeholder="Enter route number" autocomplete="off">
           </div>
         </div>
         <div class="search-actions">
-          <div class="field" style="flex:1">
-            <label for="travelDate" data-i18n="search.date">Date</label>
-            <input id="travelDate" type="date">
-          </div>
           <button id="searchBtn" class="btn btn--primary" type="button" data-i18n="search.search">Search</button>
         </div>
       </section>
@@ -109,6 +96,8 @@
           </div>
         </details>
       </aside>
+
+      <button id="panelDropdownBtn" type="button" class="panel-dropdown-toggle" aria-label="Toggle search panel" aria-expanded="true" title="Toggle panel">˅</button>
     </div>
 
     <!-- Detail card -->
@@ -119,9 +108,6 @@
       </div>
       <div class="detail-card__meta" id="detailMeta"></div>
       <div class="detail-card__timeline" id="detailTimeline"></div>
-      <div style="display:flex;gap:8px;">
-        <button id="bookSeatsBtn" class="btn btn--primary" type="button" style="flex:1" data-i18n="map.book">Book seats →</button>
-      </div>
     </article>
 
     <!-- Floating buttons (right) -->
@@ -158,7 +144,7 @@
   <script src="js/sim.js"></script>
   <script src="js/liveFeed.js"></script>
   <script src="js/graph.js"></script>
-  <script src="js/buses.js?v=2"></script>
+  <script src="js/bmtc.js"></script>
   <div class="page-transition" id="pageTransition"></div>
   <script src="js/map.js?v=4"></script>
   <script src="js/map3d.js?v=3"></script>
@@ -172,49 +158,62 @@
       // btn2d may not exist in 2D page; create a floating 2D toggle when in 3D mode instead
       var in3d = false;
 
+      function finishSwitchTo2d(lat, lng, z) {
+        // Reveal 2D first and resize while visible, THEN set the camera — avoids
+        // Leaflet computing a stale center on a zero-size (hidden) container,
+        // which caused a visible jitter on the swap.
+        if (map3d) map3d.style.display = 'none';
+        if (map2d) map2d.style.display = '';
+        if (btn3d) btn3d.style.display = '';
+        if (btn2d) btn2d.style.display = 'none';
+        try { window.map.invalidateSize({ animate: false, pan: false }); } catch (e) {}
+        window.map.setView([lat, lng], z, { animate: false });
+      }
+
       function show2d() {
         in3d = false;
-        // animate the 3D camera flying out (zoom out, flatten) before switching
+        if (btn3d) btn3d.style.display = '';
+        if (btn2d) btn2d.style.display = 'none';
+        var m = window.map3d;
+        var lat = 15.3173, lng = 75.7139, z = 7;
         try {
-          if (window.map3d) {
-            var c3 = window.map3d.getCenter();
-            window.map3d.flyTo({ center: c3, zoom: 4, pitch: 0, bearing: 0, duration: 0.5, essential: true });
-          }
+          var c = m && m.getCenter ? m.getCenter() : null;
+          if (c) { lat = c.lat; lng = c.lng; }
+          z = m ? m.getZoom() : 7;
         } catch (e) {}
-        if (overlay) overlay.classList.add('is-active');
-        setTimeout(function () {
-          if (map3d) map3d.style.display = 'none';
-          if (map2d) map2d.style.display = '';
-          if (btn3d) btn3d.style.display = '';
-          if (btn2d) btn2d.style.display = 'none';
-          // fly the 2D map in from a zoomed-out state
+        // smooth world-flatten: tilt the 3D camera up to a top-down view, then swap to 2D
+        var done = false;
+        var swap = function () { if (done) return; done = true; finishSwitchTo2d(lat, lng, z); };
+        if (m && typeof m.easeTo === 'function') {
           try {
-            var c = (window.map3d && window.map3d.getCenter) ? window.map3d.getCenter() : null;
-            var lat = c ? c.lat : 15.3173, lng = c ? c.lng : 75.7139;
-            window.map.setView([lat, lng], 4, { animate: false });
-            setTimeout(function () {
-              window.map.flyTo([lat, lng], 7, { animate: true, duration: 1.1 });
-            }, 80);
-          } catch (e) {}
-          try { window.map.invalidateSize(); } catch (e) {}
-          requestAnimationFrame(function () { requestAnimationFrame(function () { if (overlay) overlay.classList.remove('is-active'); }); });
-        }, 520);
+            m.easeTo({ pitch: 0, bearing: 0, duration: 700, essential: true });
+            if (typeof m.once === 'function') m.once('moveend', swap);
+            setTimeout(swap, 800); // fallback in case moveend doesn't fire
+          } catch (e) { swap(); }
+        } else {
+          swap();
+        }
       }
+
       function show3d() {
         in3d = true;
         if (map2d) map2d.style.display = 'none';
         if (map3d) map3d.style.display = '';
         if (btn3d) btn3d.style.display = 'none';
         if (btn2d) btn2d.style.display = '';
-        if (overlay) { overlay.classList.add('is-active'); requestAnimationFrame(function(){ requestAnimationFrame(function(){ overlay.classList.remove('is-active'); }); }); }
         try { if (window.map3d) window.map3d.resize(); } catch(e){}
-        // sync camera from 2D view
+        // smooth world-rise: start top-down at the 2D camera, then tilt up into 3D
         try {
           var c = window.map.getCenter();
-          if (window.map3d) window.map3d.jumpTo({ center: [c.lng, c.lat], zoom: window.map.getZoom(), pitch: 0, bearing: 0 });
-          setTimeout(function () {
-            if (window.map3d) window.map3d.flyTo({ center: [c.lng, c.lat], zoom: Math.max(window.map.getZoom(), 7), pitch: 60, bearing: -20, duration: 1100, essential: true });
-          }, 80);
+          var z = window.map.getZoom();
+          if (window.map3d && typeof window.map3d.jumpTo === 'function') {
+            window.map3d.jumpTo({ center: [c.lng, c.lat], zoom: z, pitch: 0, bearing: 0 });
+            setTimeout(function () {
+              if (window.map3d && typeof window.map3d.easeTo === 'function') {
+                window.map3d.easeTo({ center: [c.lng, c.lat], zoom: z, pitch: 60, bearing: -20, duration: 900, essential: true });
+              }
+            }, 60);
+          }
         } catch(e){}
       }
 

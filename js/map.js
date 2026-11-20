@@ -12,10 +12,8 @@
   const map = L.map('map', {
     center: KARNATAKA_CENTER,
     zoom: 7,
-    minZoom: 6,
+    minZoom: 1,
     maxZoom: 18,
-    maxBounds: KARNATAKA_BOUNDS,
-    maxBoundsViscosity: 0.8,
     zoomControl: false,
     fadeAnimation: true,
     markerZoomAnimation: true
@@ -165,131 +163,16 @@
     }
   });
 
-  // ---------- City selects ----------
-  const cities = [
-    ['belagavi', 'Belagavi'], ['dharwad', 'Dharwad'], ['hubballi', 'Hubballi'],
-    ['gadag', 'Gadag'], ['vijayapura', 'Vijayapura'], ['kalaburagi', 'Kalaburagi'],
-    ['ballari', 'Ballari'], ['davangere', 'Davangere'], ['shivamogga', 'Shivamogga'],
-    ['mysuru', 'Mysuru'], ['mangaluru', 'Mangaluru'], ['bengaluru', 'Bengaluru'],
-    ['udupi', 'Udupi'], ['karwar', 'Karwar']
-  ];
-  const fromSel = document.getElementById('fromCity');
-  const toSel = document.getElementById('toCity');
-  cities.forEach(function (c) {
-    const o1 = new Option(c[1], c[0]); fromSel.add(o1);
-    const o2 = new Option(c[1], c[0]); toSel.add(o2);
-  });
-  fromSel.value = 'belagavi';
-  toSel.value = 'bengaluru';
-
-  const swapBtn = document.getElementById('swapCities');
-  if (swapBtn) {
-    swapBtn.addEventListener('click', function () {
-      const t = fromSel.value; fromSel.value = toSel.value; toSel.value = t;
-    });
-  }
-
-  // Date default today
-  const dateInput = document.getElementById('travelDate');
-  if (dateInput) {
-    const d = new Date();
-    const pad = function (n) { return String(n).padStart(2, '0'); };
-    dateInput.value = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
-  }
-
-  // ---------- Search ----------
+  // ---------- Search (BMTC live route) ----------
   const searchBtn = document.getElementById('searchBtn');
   if (searchBtn) {
     searchBtn.addEventListener('click', function () {
-      const from = fromSel.value;
-      const to = toSel.value;
-      // highlight route on map: draw polyline from routes.json
-      if (window.routesData && window.routesData[from + '-' + to]) {
-        drawRoute(from + '-' + to, true);
-      } else if (window.routesData && window.routesData[to + '-' + from]) {
-        drawRoute(to + '-' + from, true);
-      }
-      // populate bus list with results
+      const q = document.getElementById('routeQuery');
+      const text = q && q.value ? q.value.trim() : '';
+      if (!text) return;
       const meta = document.getElementById('panelMeta');
-      const routeKey = (window.routesData && window.routesData[from + '-' + to]) ? (from + '-' + to) : (to + '-' + from);
-      if (meta) meta.textContent = routeKey.replace('-', ' → ') + ' · trips';
-      const list = document.getElementById('busList');
-      if (list) list.innerHTML = '';
-
-      // direct buses
-      const direct = (window.DB) ? window.DB.getTripsByRoute(from, to, null) : [];
-      const directHeader = document.createElement('div');
-      directHeader.style.cssText = 'font-weight:800;font-size:0.85rem;margin:4px 0;';
-      directHeader.textContent = 'Direct buses (' + direct.length + ')';
-      if (list) list.appendChild(directHeader);
-
-      direct.forEach(function (trip) {
-        const bus = trip.bus;
-        const route = trip.route;
-        const dist = route ? route.distance_km : 0;
-        const fare = Math.round(dist * (bus ? bus.fare_per_km : 1) + 20);
-        const item = document.createElement('div');
-        item.className = 'bus-item';
-        item.setAttribute('data-id', trip.id);
-        item.innerHTML =
-          '<div class="bus-item__top"><span class="bus-item__num">' + (bus ? bus.number : trip.id) + '</span>' +
-          '<span class="badge badge--' + (bus ? bus.type.toLowerCase() : 'express') + '">' + (bus ? bus.type : '') + '</span>' +
-          '<span class="bus-item__eta">' + trip.departure + '–' + trip.arrival + '</span></div>' +
-          '<div class="bus-item__meta"><span>Seats: ' + (bus ? bus.total_seats : 0) + '</span>' +
-          '<span>Fare: ₹' + fare + '</span><span>Est. fare, demo data</span></div>' +
-          '<div class="bus-item__progress"><div class="bus-item__progress-bar" style="width:0%;background:' + TYPE_COLOR_ROUTE[bus.type.toLowerCase()] + '"></div></div>';
-        item.onclick = function () {
-          if (window.Buses) window.Buses.selectBus(trip.id);
-        };
-        item.querySelectorAll('button').forEach(function (btn) {
-          btn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            const tid = btn.getAttribute('data-trip');
-            if (btn.getAttribute('data-action') === 'view') {
-              if (window.Buses) window.Buses.selectBus(tid);
-            } else {
-              window.location.href = 'seats.html?trip=' + encodeURIComponent(tid);
-            }
-          });
-        });
-        if (list) list.appendChild(item);
-      });
-
-      // 1-change options
-      if (window.DB) {
-        const changes = window.DB.getTripsWithOneChange(from, to, null);
-        if (changes.length) {
-          const ch = document.createElement('div');
-          ch.style.cssText = 'font-weight:800;font-size:0.85rem;margin:8px 0 4px;';
-          ch.textContent = '1 change options (' + changes.length + ')';
-          if (list) list.appendChild(ch);
-          changes.forEach(function (c) {
-            const item = document.createElement('div');
-            item.className = 'bus-item';
-            item.setAttribute('data-id', c.first.id);
-            item.innerHTML =
-              '<div class="bus-item__top"><span class="bus-item__num">' + c.first.id + ' + ' + c.second.id + '</span>' +
-              '<span class="badge badge--express">1 change</span></div>' +
-              '<div class="bus-item__meta"><span>Via ' + c.intermediate + '</span>' +
-              '<span>' + c.first.departure + ' → ' + c.second.arrival + '</span></div>' +
-              '<div style="display:flex;gap:6px;margin-top:4px;">' +
-              '<button class="btn btn--sm btn--primary" data-action="seats" data-trip="' + c.first.id + '">Select seats</button></div>';
-            item.onclick = function () {
-              if (window.Buses) window.Buses.selectBus(c.first.id);
-            };
-            item.querySelectorAll('button').forEach(function (btn) {
-              btn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                window.location.href = 'seats.html?trip=' + encodeURIComponent(btn.getAttribute('data-trip'));
-              });
-            });
-            if (list) list.appendChild(item);
-          });
-        }
-      }
-
-      // draw route + fit bounds
-      drawRoute(routeKey, true);
+      if (meta) meta.textContent = 'Live · ' + text;
+      if (window.Buses && window.Buses.search) window.Buses.search(text);
     });
   }
 
@@ -302,6 +185,8 @@
     return (f && f !== 'all') ? f : null;
   }
   function drawRoute(key, selected) {
+    // route drawing replaced by live BMTC layer (RoutePoints polyline in bmtc.js)
+    return;
     // clear previous
     Object.keys(routeLayers).forEach(function (k) {
       if (routeLayers[k]) map.removeLayer(routeLayers[k]);
@@ -368,19 +253,21 @@
     });
   }
 
-  // Sidebar collapse/expand
+  // Panel dropdown toggle
   const leftStack = document.getElementById('leftStack');
-  const collapseBtn = document.getElementById('collapseSidebarBtn');
-  const expandBtn = document.getElementById('expandSidebarBtn');
-  function setSidebarCollapsed(collapsed) {
+  const dropdownBtn = document.getElementById('panelDropdownBtn');
+  function setPanelCollapsed(collapsed) {
     if (!leftStack) return;
     leftStack.classList.toggle('collapsed', collapsed);
-    if (collapseBtn) collapseBtn.hidden = collapsed;
-    if (expandBtn) expandBtn.hidden = !collapsed;
+    if (dropdownBtn) {
+      dropdownBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    }
     setTimeout(function () { map.invalidateSize(); }, 280);
   }
-  if (collapseBtn) collapseBtn.addEventListener('click', function () { setSidebarCollapsed(true); });
-  if (expandBtn) expandBtn.addEventListener('click', function () { setSidebarCollapsed(false); });
+  if (dropdownBtn) dropdownBtn.addEventListener('click', function () {
+    const currentlyCollapsed = leftStack.classList.contains('collapsed');
+    setPanelCollapsed(!currentlyCollapsed);
+  });
 
   // ---------- Detail card close ----------
   const detailClose = document.getElementById('detailClose');
@@ -514,42 +401,8 @@
   }
   setInterval(updateStatusChip, 1000);
 
-  // ---------- Init data + buses ----------
-  // load routes.json into window.routesData
-  fetch('data/routes.json').then(function (r) { return r.json(); }).then(function (json) {
-    window.routesData = json;
-    // seed trips durations
-    const durations = {};
-    Object.keys(json).forEach(function (k) { durations[k] = json[k].duration_min || 180; });
-    if (window.Sim) window.Sim.seedTrips(durations);
-    // init buses
-    if (window.Buses) window.Buses.init();
-    // If opened with ?trip= &follow=1, focus that trip's route and follow
-    (function handleTrackParam() {
-      const tp = new URLSearchParams(location.search).get('trip');
-      const follow = new URLSearchParams(location.search).get('follow');
-      if (!tp) return;
-      let routeKey = null;
-      if (window.DB) {
-        const bk = window.DB.getBooking(tp);
-        const tr = bk ? window.DB.getTrip(bk.trip_id) : window.DB.getTrip(tp);
-        if (tr && tr.route_id) routeKey = tr.route_id;
-      }
-      if (routeKey) {
-        const simTrips = (window.Sim && window.Sim.trips) ? window.Sim.trips : [];
-        const match = simTrips.find(function (t) { return t.routeKey === routeKey; });
-        if (match && window.Buses) {
-          setTimeout(function () {
-            window.Buses.selectBus(match.id);
-            if (follow === '1') window.Buses.setFollow(true);
-          }, 500);
-        }
-        drawRoute(routeKey, true);
-      }
-    })();
-    // draw all routes muted initially
-    if (!new URLSearchParams(location.search).get('trip')) drawRoute(null, false);
-  }).catch(function (e) { console.error('routes load failed', e); });
+  // ---------- Init live BMTC buses ----------
+  if (window.Buses) window.Buses.init();
 
   // expose drawRoute globally? keep local
   window.drawRoute = drawRoute;
@@ -584,26 +437,6 @@
       ls.style.maxHeight = nearest + 'px';
     });
   })();
-
-  // ---------- Active booking toast ----------
-  function checkActiveBookingToast() {
-    if (!window.DB) return;
-    const bookings = window.DB.getBookings().filter(function (b) { return b.status === 'confirmed'; });
-    if (!bookings.length) return;
-    const b = bookings[bookings.length - 1];
-    const trip = window.DB.getTrip(b.trip_id);
-    if (!trip) return;
-    const now = window.Sim ? window.Sim.now() : Date.now();
-    const dep = new Date(trip.trip_date + 'T' + trip.departure).getTime();
-    const arr = new Date(trip.trip_date + 'T' + trip.arrival).getTime();
-    if (now < dep || now > arr) return;
-    const progress = (now - dep) / (arr - dep);
-    const stopsAway = Math.max(1, Math.round((1 - progress) * 4));
-    if (stopsAway <= 3) {
-      window.showToast('Your bus is ' + stopsAway + ' stop(s) away.', 'info');
-    }
-  }
-  setInterval(checkActiveBookingToast, 30000);
 
   // ---------- Boot ----------
   function boot() {
